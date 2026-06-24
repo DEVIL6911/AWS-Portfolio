@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchAllMembers, updateMember, deleteMember } from '../api/members';
+import { fetchAllMembers, updateMember, deleteMember, createMember } from '../api/members';
 import SectionHeader from '../components/SectionHeader';
 
 export default function AdminPage() {
@@ -48,6 +48,25 @@ export default function AdminPage() {
     setSaveStatus('');
   };
 
+  const handleCreateNew = () => {
+    setSelectedMember(null);
+    setFormData({
+      name: '',
+      team_key: 'technical',
+      role: '',
+      bio: '',
+      avatar_url: '',
+      sticker: '',
+      email: '',
+      github: '',
+      linkedin: '',
+      instagram: '',
+      skills: [],
+      achievements: []
+    });
+    setSaveStatus('');
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -79,8 +98,15 @@ export default function AdminPage() {
         skills: formData.skills.filter(s => s.trim() !== ''),
         achievements: formData.achievements.filter(a => a.trim() !== '')
       };
-      await updateMember(selectedMember.id, cleanedData);
-      setSaveStatus('Saved successfully!');
+      
+      if (selectedMember && selectedMember.id) {
+        await updateMember(selectedMember.id, cleanedData);
+        setSaveStatus('Saved successfully!');
+      } else {
+        await createMember(cleanedData);
+        setSaveStatus('Created successfully!');
+      }
+      
       loadMembers();
     } catch (err) {
       setSaveStatus(`Error: ${err.message}`);
@@ -120,7 +146,10 @@ export default function AdminPage() {
           
           {/* Sidebar List */}
           <div style={{ background: 'var(--card)', borderRadius: 'var(--radius-lg)', padding: '20px', border: '1px solid var(--border)' }}>
-            <h3 style={{ marginBottom: '16px', color: 'var(--purple-light)' }}>Members List</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ color: 'var(--purple-light)', margin: 0 }}>Members List</h3>
+              <button onClick={handleCreateNew} style={{ background: 'var(--purple)', color: 'white', border: 'none', borderRadius: '4px', padding: '6px 12px', cursor: 'pointer', fontSize: '0.85rem' }}>+ New</button>
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '70vh', overflowY: 'auto' }}>
               {members.map(member => (
                 <button
@@ -219,11 +248,13 @@ export default function AdminPage() {
 
                 <div style={{ display: 'flex', gap: '20px', marginTop: '20px', alignItems: 'center' }}>
                   <button type="submit" style={{ padding: '12px 30px', background: 'var(--purple)', border: 'none', borderRadius: 'var(--radius-pill)', color: 'white', fontWeight: 'bold', cursor: 'pointer', fontSize: '1rem' }}>
-                    Save Changes
+                    {selectedMember ? 'Save Changes' : 'Create Member'}
                   </button>
-                  <button type="button" onClick={handleDelete} style={{ padding: '12px 30px', background: 'transparent', border: '1px solid #ef4444', borderRadius: 'var(--radius-pill)', color: '#ef4444', fontWeight: 'bold', cursor: 'pointer', fontSize: '1rem' }}>
-                    Delete Member
-                  </button>
+                  {selectedMember && (
+                    <button type="button" onClick={handleDelete} style={{ padding: '12px 30px', background: 'transparent', border: '1px solid #ef4444', borderRadius: 'var(--radius-pill)', color: '#ef4444', fontWeight: 'bold', cursor: 'pointer', fontSize: '1rem' }}>
+                      Delete Member
+                    </button>
+                  )}
                   {saveStatus && <span style={{ color: saveStatus.includes('Error') ? '#ef4444' : '#10b981' }}>{saveStatus}</span>}
                 </div>
               </form>
