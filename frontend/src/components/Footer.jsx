@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export default function Footer() {
   return (
     <footer className="footer">
@@ -8,7 +10,10 @@ export default function Footer() {
           </span>
           <span>AWS Cloud Club</span>
         </div>
-        <p className="footer__copy">&copy; 2026 AWS Cloud Club. All rights reserved.</p>
+        <p className="footer__copy">
+          &copy; 2026 AWS Cloud Club. All rights reserved. 
+          {' | '}<Link to="/admin" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Admin Panel</Link>
+        </p>
         <div className="footer__social">
           <a href="#" aria-label="GitHub">
             <i className="fa-brands fa-github"></i>

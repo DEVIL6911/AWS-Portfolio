@@ -5,6 +5,7 @@ import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
 import TeamPage from './pages/TeamPage';
 import FoundingPage from './pages/FoundingPage';
+import AdminPage from './pages/AdminPage';
 
 function ScrollToTop() {
   return null; // scroll handled per-page
@@ -27,6 +28,7 @@ export default function App() {
         <Route path="/event-coordination" element={<TeamPage teamKey="event-coordination" />} />
         <Route path="/marketing-team" element={<TeamPage teamKey="marketing" />} />
         <Route path="/founding-members" element={<FoundingPage />} />
+        <Route path="/admin" element={<AdminPage />} />
       </Routes>
       <Footer />
     </BrowserRouter>

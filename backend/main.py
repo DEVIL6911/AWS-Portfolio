@@ -71,6 +71,20 @@ class MemberCreate(BaseModel):
     skills: List[str] = []
     achievements: List[str] = []
 
+class MemberUpdate(BaseModel):
+    name: str
+    team_key: str
+    role: str
+    bio: Optional[str] = None
+    avatar_url: Optional[str] = None
+    sticker: Optional[str] = None
+    email: Optional[str] = None
+    github: Optional[str] = None
+    linkedin: Optional[str] = None
+    instagram: Optional[str] = None
+    skills: List[str] = []
+    achievements: List[str] = []
+
 @app.on_event("startup")
 def startup_event():
     init_db()
@@ -114,6 +128,47 @@ def create_member(member_data: MemberCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_member)
     return new_member
+
+@app.put("/api/members/{member_id}", response_model=MemberResponse)
+def update_member(member_id: int, member_data: MemberUpdate, db: Session = Depends(get_db)):
+    db_member = db.query(Member).filter(Member.id == member_id).first()
+    if not db_member:
+        raise HTTPException(status_code=404, detail="Member not found")
+    
+    db_member.name = member_data.name
+    db_member.team_key = member_data.team_key
+    db_member.role = member_data.role
+    db_member.bio = member_data.bio
+    db_member.avatar_url = member_data.avatar_url
+    db_member.sticker = member_data.sticker
+    db_member.email = member_data.email
+    db_member.github = member_data.github
+    db_member.linkedin = member_data.linkedin
+    db_member.instagram = member_data.instagram
+
+    # Update skills
+    db.query(Skill).filter(Skill.member_id == member_id).delete()
+    for skill_name in member_data.skills:
+        db.add(Skill(member_id=member_id, name=skill_name))
+
+    # Update achievements
+    db.query(Achievement).filter(Achievement.member_id == member_id).delete()
+    for ach_title in member_data.achievements:
+        db.add(Achievement(member_id=member_id, title=ach_title))
+
+    db.commit()
+    db.refresh(db_member)
+    return db_member
+
+@app.delete("/api/members/{member_id}")
+def delete_member(member_id: int, db: Session = Depends(get_db)):
+    db_member = db.query(Member).filter(Member.id == member_id).first()
+    if not db_member:
+        raise HTTPException(status_code=404, detail="Member not found")
+    
+    db.delete(db_member)
+    db.commit()
+    return {"message": "Member deleted successfully"}
 
 def seed_db():
     db = SessionLocal()
